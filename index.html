@@ -1,0 +1,1970 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal do Educador TV — Digital Signage Suite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070A12; --panel:#0E1320; --panel-2:#161D2E; --line:#222B40;
+  --ink:#E6EAF2; --ink-dim:#8A93A8; --ink-soft:#5A6378;
+  --brand:#00D4FF; --brand-2:#0066FF; --accent:#FFB020; --ok:#00E08F; --danger:#FF4D6D;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --sans:'Manrope',-apple-system,system-ui,sans-serif;
+  --radius:10px; --radius-sm:6px;
+  --shadow:0 1px 0 rgba(255,255,255,.04) inset, 0 8px 24px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow:hidden}
+button,input,select,textarea{font-family:inherit;color:inherit}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--ink-soft)}
+
+/* ========================================================================
+   ADMIN — COCKPIT LAYOUT
+   ======================================================================== */
+.admin{display:grid;grid-template-rows:56px 1fr 28px;height:100vh}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;gap:16px;padding:0 20px;background:var(--panel);border-bottom:1px solid var(--line);position:relative}
+.topbar::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(0,212,255,.04) 30%,rgba(0,212,255,.04) 70%,transparent);pointer-events:none}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.01em}
+.brand-mark{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--brand),var(--brand-2));display:grid;place-items:center;font-family:var(--mono);font-size:14px;font-weight:700;color:#000;box-shadow:0 0 20px rgba(0,212,255,.35)}
+.brand-text{display:flex;flex-direction:column;line-height:1.1}
+.brand-text small{font-family:var(--mono);font-size:9px;color:var(--ink-soft);letter-spacing:.15em;font-weight:500}
+.topbar-sep{width:1px;height:24px;background:var(--line)}
+.tabs{display:flex;gap:2px;background:#070A12;padding:3px;border-radius:8px;border:1px solid var(--line)}
+.tab{padding:7px 14px;font-size:12px;font-weight:600;color:var(--ink-dim);border:none;background:transparent;border-radius:5px;cursor:pointer;transition:.15s;letter-spacing:.02em}
+.tab:hover{color:var(--ink)}
+.tab.active{background:var(--panel-2);color:var(--brand);box-shadow:0 1px 0 rgba(255,255,255,.04) inset}
+.topbar-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:var(--panel-2);border:1px solid var(--line);color:var(--ink);border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;letter-spacing:.01em}
+.btn:hover{border-color:var(--ink-soft);background:#1B2438}
+.btn-primary{background:linear-gradient(180deg,var(--brand) 0%,#00B5E0 100%);color:#001520;border-color:transparent;box-shadow:0 0 0 1px rgba(0,212,255,.3),0 6px 16px rgba(0,212,255,.25)}
+.btn-primary:hover{box-shadow:0 0 0 1px rgba(0,212,255,.5),0 8px 22px rgba(0,212,255,.4)}
+.btn-launch{background:linear-gradient(180deg,var(--ok) 0%,#00B070 100%);color:#001A10;border-color:transparent;font-weight:700;padding:8px 18px}
+.btn-launch:hover{box-shadow:0 0 0 1px rgba(0,224,143,.5),0 8px 22px rgba(0,224,143,.35)}
+.btn-icon{padding:8px;width:32px;height:32px;justify-content:center}
+.btn-danger{color:var(--danger);border-color:rgba(255,77,109,.25)}
+.btn-danger:hover{background:rgba(255,77,109,.1);border-color:var(--danger)}
+
+/* MAIN GRID */
+.main{display:grid;grid-template-columns:280px 1fr 380px;overflow:hidden}
+.col{overflow-y:auto;background:var(--bg)}
+.col-left{background:var(--panel);border-right:1px solid var(--line)}
+.col-right{background:var(--panel);border-left:1px solid var(--line)}
+
+.section{padding:18px 18px 8px}
+.section-label{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--ink-soft);letter-spacing:.18em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-label::after{content:'';flex:1;height:1px;background:var(--line)}
+
+.field{margin-bottom:12px}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--ink-dim);margin-bottom:5px;letter-spacing:.02em}
+.field input[type=text],.field input[type=number],.field input[type=url],.field input[type=time],.field select,.field textarea{
+  width:100%;padding:9px 11px;background:var(--bg);border:1px solid var(--line);border-radius:6px;font-size:13px;color:var(--ink);transition:.15s
+}
+.field input[type=file]{width:100%;padding:8px;background:var(--bg);border:1px dashed var(--line);border-radius:6px;font-size:12px;color:var(--ink-dim);cursor:pointer}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(0,212,255,.12)}
+.field textarea{resize:vertical;min-height:60px;font-family:inherit}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.hint{font-size:10px;color:var(--ink-soft);margin-top:4px;line-height:1.4}
+
+/* PLAYLIST PICKER (sidebar esquerda) */
+.pl-list{padding:0 12px 18px}
+.pl-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--ink-dim);transition:.15s;border:1px solid transparent}
+.pl-item:hover{background:var(--panel-2);color:var(--ink)}
+.pl-item.active{background:var(--panel-2);color:var(--ink);border-color:var(--line);box-shadow:0 0 0 1px rgba(0,212,255,.15) inset}
+.pl-item.active .pl-dot{background:var(--brand);box-shadow:0 0 8px var(--brand)}
+.pl-dot{width:7px;height:7px;border-radius:50%;background:var(--ink-soft);flex-shrink:0}
+.pl-name{flex:1;font-weight:600}
+.pl-count{font-family:var(--mono);font-size:10px;color:var(--ink-soft);background:var(--bg);padding:2px 6px;border-radius:4px}
+
+/* SCHEDULE BLOCK */
+.sched-block{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:12px;margin:0 18px 12px}
+.sched-row{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center}
+.sched-arrow{color:var(--ink-soft);font-family:var(--mono);font-size:11px}
+.sched-toggle{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink-dim);margin-bottom:10px;cursor:pointer;user-select:none}
+.switch{position:relative;width:34px;height:18px;background:var(--line);border-radius:10px;transition:.2s}
+.switch::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:var(--ink-dim);border-radius:50%;transition:.2s}
+.sched-toggle input{display:none}
+.sched-toggle input:checked+.switch{background:var(--brand)}
+.sched-toggle input:checked+.switch::after{left:18px;background:#000}
+
+/* CENTER — ITEM CARDS */
+.editor-grid{padding:18px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.editor-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+.editor-card h3{font-size:13px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.editor-card h3 .badge{font-family:var(--mono);font-size:9px;color:var(--brand);background:rgba(0,212,255,.1);padding:2px 6px;border-radius:4px;letter-spacing:.1em;font-weight:600}
+.editor-actions{display:flex;gap:8px;padding:0 18px 18px;flex-wrap:wrap}
+
+.media-tabs{display:flex;gap:0;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:2px;margin-bottom:10px}
+.media-tab{flex:1;padding:6px 10px;font-size:11px;font-weight:600;color:var(--ink-dim);background:transparent;border:none;border-radius:4px;cursor:pointer;transition:.15s}
+.media-tab.active{background:var(--panel-2);color:var(--ink)}
+
+/* RIGHT — PLAYLIST QUEUE */
+.queue-header{padding:18px 18px 12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.queue-title{font-size:13px;font-weight:700}
+.queue-meta{font-family:var(--mono);font-size:10px;color:var(--ink-soft)}
+.queue-list{padding:12px}
+.queue-empty{text-align:center;padding:60px 20px;color:var(--ink-soft);font-size:12px}
+.queue-empty-icon{font-size:32px;opacity:.3;margin-bottom:12px}
+.queue-item{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px;display:grid;grid-template-columns:48px 1fr auto;gap:10px;align-items:center;transition:.15s;cursor:grab}
+.queue-item:hover{border-color:var(--ink-soft)}
+.queue-item.dragging{opacity:.4}
+.queue-item.drag-over{border-color:var(--brand)}
+.qi-thumb{width:48px;height:48px;border-radius:6px;background:var(--bg);overflow:hidden;display:grid;place-items:center;font-size:18px}
+.qi-thumb img,.qi-thumb video{width:100%;height:100%;object-fit:cover}
+.qi-info{min-width:0}
+.qi-title{font-size:12px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qi-meta{font-family:var(--mono);font-size:10px;color:var(--ink-soft);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap}
+.qi-meta span{display:inline-flex;align-items:center;gap:3px}
+.qi-actions{display:flex;gap:4px}
+.qi-btn{width:24px;height:24px;border-radius:5px;background:var(--bg);border:1px solid var(--line);color:var(--ink-dim);cursor:pointer;display:grid;place-items:center;font-size:11px;transition:.15s}
+.qi-btn:hover{color:var(--ink);border-color:var(--ink-soft)}
+.qi-btn.danger:hover{color:var(--danger);border-color:var(--danger)}
+
+/* STATUS BAR */
+.statusbar{background:var(--panel);border-top:1px solid var(--line);padding:0 16px;display:flex;align-items:center;gap:18px;font-family:var(--mono);font-size:10px;color:var(--ink-soft);letter-spacing:.05em}
+.status-item{display:flex;align-items:center;gap:6px}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px var(--ok)}
+.status-dot.idle{background:var(--ink-soft);box-shadow:none}
+
+/* SETTINGS PANEL */
+.settings-grid{padding:18px;display:grid;grid-template-columns:repeat(2,1fr);gap:14px;max-width:1100px}
+.settings-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+.settings-card h3{font-size:13px;font-weight:700;margin-bottom:14px}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:9000}
+.modal-bg.show{display:flex}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px;min-width:400px;max-width:500px}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:6px}
+.modal p{font-size:13px;color:var(--ink-dim);margin-bottom:16px;line-height:1.5}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:40px;right:20px;display:flex;flex-direction:column;gap:8px;z-index:10000;pointer-events:none}
+.toast{background:var(--panel-2);border:1px solid var(--line);border-left:3px solid var(--brand);padding:12px 16px;border-radius:7px;font-size:12px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.5);animation:toast-in .3s ease;min-width:240px}
+.toast.ok{border-left-color:var(--ok)}
+.toast.err{border-left-color:var(--danger)}
+@keyframes toast-in{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+.hide{display:none!important}
+.view{display:none}
+.view.active{display:block}
+
+/* ========================================================================
+   ACCESS GUARD — bloqueio por dom\u00ednio (proteção comercial NEWPC)
+   ======================================================================== */
+.guard{position:fixed;inset:0;background:#070A12;color:#E6EAF2;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:99999;padding:40px 20px;text-align:center;font-family:'Manrope',-apple-system,sans-serif}
+.guard.show{display:flex}
+.guard-bg{position:absolute;inset:0;background:
+  radial-gradient(circle at 20% 30%, rgba(0,212,255,0.08) 0%, transparent 50%),
+  radial-gradient(circle at 80% 70%, rgba(255,176,32,0.06) 0%, transparent 50%),
+  linear-gradient(180deg,#070A12 0%,#0E1320 100%);
+  z-index:-1
+}
+.guard-mark{display:flex;align-items:center;gap:14px;margin-bottom:48px}
+.guard-mark-logo{width:54px;height:54px;border-radius:12px;background:linear-gradient(135deg,#00D4FF,#0066FF);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:#000;box-shadow:0 0 30px rgba(0,212,255,.4)}
+.guard-mark-text{text-align:left;line-height:1.2}
+.guard-mark-text strong{display:block;font-size:18px;font-weight:800}
+.guard-mark-text small{font-family:'JetBrains Mono',monospace;font-size:10px;color:#5A6378;letter-spacing:.2em}
+.guard-icon{width:80px;height:80px;border-radius:50%;background:rgba(255,77,109,.1);border:2px solid rgba(255,77,109,.3);display:grid;place-items:center;font-size:36px;margin-bottom:24px}
+.guard h1{font-size:clamp(28px,3.5vw,42px);font-weight:800;letter-spacing:-.02em;margin-bottom:16px;max-width:700px}
+.guard h1 span{color:#00D4FF}
+.guard-lead{font-size:17px;color:#8A93A8;max-width:560px;line-height:1.6;margin-bottom:36px}
+.guard-card{background:#0E1320;border:1px solid #222B40;border-radius:14px;padding:28px 32px;max-width:560px;width:100%;text-align:left;margin-bottom:20px}
+.guard-card h3{font-family:'JetBrains Mono',monospace;font-size:11px;color:#00D4FF;letter-spacing:.2em;font-weight:600;margin-bottom:14px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.guard-card h3::before{content:'';width:18px;height:2px;background:#00D4FF}
+.guard-card p{font-size:14px;color:#E6EAF2;line-height:1.6;margin-bottom:8px}
+.guard-card p strong{color:#FFB020}
+.guard-card .guard-detail{font-family:'JetBrains Mono',monospace;font-size:11px;color:#5A6378;background:#070A12;padding:10px 12px;border-radius:6px;margin-top:12px;word-break:break-all;border:1px solid #222B40}
+.guard-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.guard-btn{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;background:linear-gradient(180deg,#00D4FF 0%,#00B5E0 100%);color:#001520;text-decoration:none;border-radius:8px;font-size:14px;font-weight:700;letter-spacing:.01em;transition:.2s;box-shadow:0 8px 24px rgba(0,212,255,.25);border:none;cursor:pointer;font-family:inherit}
+.guard-btn:hover{box-shadow:0 12px 32px rgba(0,212,255,.4);transform:translateY(-1px)}
+.guard-btn.secondary{background:#161D2E;color:#E6EAF2;box-shadow:none;border:1px solid #222B40}
+.guard-btn.secondary:hover{border-color:#5A6378;background:#1B2438;transform:none}
+.guard-footer{margin-top:48px;font-family:'JetBrains Mono',monospace;font-size:10px;color:#5A6378;letter-spacing:.15em}
+.guard-footer a{color:#00D4FF;text-decoration:none}
+
+/* ========================================================================
+   PLAYER — TV FULLSCREEN
+   ======================================================================== */
+.tv{position:fixed;inset:0;background:#000;color:#fff;display:none;flex-direction:column;z-index:5000}
+.tv.show{display:flex}
+.tv-stage{flex:1;display:grid;grid-template-columns:1fr 460px;overflow:hidden;position:relative}
+.tv-stage.full{grid-template-columns:1fr}
+.tv-stage.full .tv-side{display:none}
+
+.tv-media{position:relative;background:#000;overflow:hidden}
+.tv-media img,.tv-media video,.tv-media iframe{width:100%;height:100%;object-fit:cover;border:none}
+.tv-media .ken-burns{animation:kenburns 20s ease-in-out infinite alternate}
+@keyframes kenburns{from{transform:scale(1)}to{transform:scale(1.08)}}
+
+.tv-side{background:linear-gradient(180deg,#0E1320 0%,#070A12 100%);padding:50px 44px 30px;display:flex;flex-direction:column;border-left:1px solid rgba(255,255,255,.06);position:relative}
+.tv-side::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:linear-gradient(180deg,var(--brand) 0%,var(--brand-2) 100%);opacity:.6}
+.tv-logo{max-height:56px;max-width:200px;object-fit:contain;margin-bottom:30px}
+.tv-logo-placeholder{height:32px;font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.3);letter-spacing:.2em;font-weight:500;margin-bottom:30px}
+.tv-eyebrow{font-family:var(--mono);font-size:11px;color:var(--brand);letter-spacing:.25em;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.tv-eyebrow::before{content:'';width:24px;height:2px;background:var(--brand)}
+.tv-title{font-size:clamp(28px,3.2vw,46px);font-weight:800;line-height:1.1;letter-spacing:-.02em;margin-bottom:22px}
+.tv-desc{font-size:clamp(15px,1.15vw,19px);line-height:1.55;color:rgba(255,255,255,.85);flex:1;overflow:hidden;font-weight:400}
+.tv-meta{margin-top:24px;padding-top:24px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:flex-end}
+.tv-meta-loc{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.15em;font-weight:500;margin-bottom:6px}
+.tv-clock{font-family:var(--mono);font-size:54px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.tv-temp{font-size:32px;font-weight:600;color:var(--accent);font-family:var(--mono)}
+.tv-date{font-size:13px;color:rgba(255,255,255,.55);margin-top:4px;text-transform:capitalize}
+
+/* PROGRESS BAR */
+.tv-progress{position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(255,255,255,.08);z-index:10}
+.tv-progress-bar{height:100%;background:linear-gradient(90deg,var(--brand),var(--accent));width:0;transition:width .1s linear;box-shadow:0 0 8px var(--brand)}
+
+/* FULLSCREEN MODE — overlay com info */
+.tv-stage.full .tv-overlay{display:flex}
+.tv-overlay{display:none;position:absolute;left:0;right:0;bottom:0;padding:40px 50px 60px;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.85) 100%);flex-direction:column;gap:8px}
+.tv-overlay .tv-eyebrow{margin-bottom:8px}
+.tv-overlay .tv-title{font-size:clamp(24px,3vw,40px);margin-bottom:0}
+
+/* FOOTER */
+.tv-footer{height:78px;background:linear-gradient(90deg,#001830 0%,#002645 50%,#001830 100%);display:grid;grid-template-columns:1fr 380px;align-items:center;border-top:2px solid var(--brand);position:relative}
+.tv-footer::before{content:'';position:absolute;top:-2px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--brand),var(--accent),var(--brand),transparent);box-shadow:0 0 12px var(--brand)}
+.tv-ticker{overflow:hidden;display:flex;align-items:center;height:100%;padding:0 0 0 24px}
+.tv-ticker-track{display:inline-flex;white-space:nowrap;animation:ticker linear infinite;font-size:24px;font-weight:600;letter-spacing:.01em;gap:60px}
+.tv-ticker-track span{display:inline-flex;align-items:center;gap:60px}
+.tv-ticker-track::after{content:'•';color:var(--accent);font-size:20px;margin:0 30px}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+.tv-brand{padding:0 24px;border-left:1px solid rgba(255,255,255,.15);height:100%;display:flex;flex-direction:column;justify-content:center;gap:4px}
+.tv-brand-name{font-size:15px;font-weight:800;letter-spacing:.02em;color:var(--brand)}
+.tv-brand-url{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.1em}
+
+/* TV STANDBY (sem playlist) */
+.tv-standby{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;background:#000;z-index:100}
+.tv-standby-mark{font-family:var(--mono);font-size:13px;color:var(--brand);letter-spacing:.3em}
+.tv-standby h1{font-size:48px;font-weight:800;letter-spacing:-.02em}
+.tv-standby p{color:rgba(255,255,255,.5);font-size:14px}
+
+/* HOTKEYS HINT */
+.tv-hint{position:fixed;bottom:90px;right:20px;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);padding:10px 14px;border-radius:6px;font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.5);letter-spacing:.05em;z-index:6000;border:1px solid rgba(255,255,255,.1);opacity:0;transition:opacity .3s;pointer-events:none}
+.tv-hint.show{opacity:1}
+
+@media (max-width:1280px){
+  .main{grid-template-columns:240px 1fr 320px}
+  .editor-grid{grid-template-columns:1fr}
+}
+
+/* ========================================================================
+   PLAYER VERTICAL (PORTRAIT) — totens, hall de prefeituras, recepções
+   ======================================================================== */
+.tv.portrait .tv-stage{
+  grid-template-columns:1fr;
+  grid-template-rows:55fr 45fr;
+}
+.tv.portrait .tv-stage.full{
+  grid-template-rows:1fr;
+}
+.tv.portrait .tv-side{
+  border-left:none;
+  border-top:1px solid rgba(255,255,255,.06);
+  padding:36px 44px 24px;
+}
+.tv.portrait .tv-side::before{
+  width:100%;height:3px;
+  background:linear-gradient(90deg,var(--brand) 0%,var(--brand-2) 100%);
+}
+.tv.portrait .tv-logo,
+.tv.portrait .tv-logo-placeholder{
+  position:absolute;top:24px;right:32px;margin-bottom:0;max-height:42px
+}
+.tv.portrait .tv-eyebrow{margin-top:8px}
+.tv.portrait .tv-title{
+  font-size:clamp(36px,4.5vw,68px);
+  margin-bottom:18px;
+}
+.tv.portrait .tv-desc{
+  font-size:clamp(18px,1.6vw,26px);
+  line-height:1.5;
+}
+.tv.portrait .tv-meta{
+  margin-top:16px;padding-top:18px;
+  display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:center
+}
+.tv.portrait .tv-meta-loc{margin-bottom:4px}
+.tv.portrait .tv-clock{font-size:44px}
+.tv.portrait .tv-temp{font-size:38px}
+.tv.portrait .tv-date{display:none}
+
+/* footer compacto no vertical */
+.tv.portrait .tv-footer{
+  height:64px;
+  grid-template-columns:1fr auto;
+}
+.tv.portrait .tv-ticker-track{font-size:18px;gap:40px}
+.tv.portrait .tv-brand{padding:0 18px}
+.tv.portrait .tv-brand-name{font-size:12px}
+.tv.portrait .tv-brand-url{font-size:9px}
+
+/* overlay no full-screen vertical */
+.tv.portrait .tv-overlay{padding:30px 40px 50px}
+.tv.portrait .tv-overlay .tv-title{font-size:clamp(28px,3.5vw,52px)}
+
+/* ORIENTATION INDICATOR no admin */
+.orient-display{
+  font-family:var(--mono);font-size:10px;color:var(--ink-soft);
+  background:var(--bg);padding:3px 8px;border-radius:4px;
+  border:1px solid var(--line);margin-left:6px
+}
+</style>
+<script>
+/* ============================================================
+   ACCESS GUARD — Bloqueio por domínio (proteção comercial)
+   Roda ANTES de tudo. Se passar, o app inicia normal.
+   ============================================================ */
+(function(){
+  // CONFIG: domínios autorizados (edite aqui se precisar adicionar mais)
+  const ALLOWED_HOSTS = [
+    'portaldoeducador.com.br',
+    'www.portaldoeducador.com.br',
+    'newpc.com.br',
+    'www.newpc.com.br',
+    // Para desenvolvimento local — REMOVA antes de publicar no GitHub Pages
+    'localhost',
+    '127.0.0.1',
+    'file://'
+  ];
+
+  function isAllowed(host){
+    if(!host) return false;
+    return ALLOWED_HOSTS.some(allowed =>
+      host === allowed || host.endsWith('.' + allowed)
+    );
+  }
+
+  function checkAccess(){
+    const currentHost = window.location.hostname;
+    const referrer = document.referrer;
+    const isInIframe = window.self !== window.top;
+    let parentHost = '';
+
+    // Se está em iframe, tenta pegar o host do parent (Webnode embarca via iframe)
+    if(isInIframe){
+      try {
+        parentHost = window.parent.location.hostname;
+      } catch(e){
+        // cross-origin — pega do referrer
+        try { parentHost = new URL(referrer).hostname; } catch(_){}
+      }
+    }
+
+    // Se está direto no navegador (não iframe), checa o próprio hostname
+    const hostToCheck = isInIframe ? parentHost : currentHost;
+
+    // libera se hostname está autorizado
+    const allowed = isAllowed(hostToCheck) || isAllowed(currentHost);
+
+    return {
+      allowed,
+      currentHost,
+      parentHost,
+      referrer: referrer || '(nenhum)',
+      isInIframe
+    };
+  }
+
+  function showGuard(info){
+    // espera DOM carregar para mostrar o guard
+    function display(){
+      const g = document.getElementById('accessGuard');
+      if(!g){ setTimeout(display, 50); return; }
+      g.classList.add('show');
+
+      // detalhes técnicos para diagnóstico
+      const detail = document.getElementById('guardDetail');
+      if(detail){
+        detail.innerHTML =
+          `Origem detectada: <b>${info.currentHost || '(local)'}</b><br>` +
+          (info.isInIframe ? `Embarcado em: <b>${info.parentHost || 'cross-origin'}</b><br>` : '') +
+          `Referrer: ${info.referrer}<br>` +
+          `Domínio autorizado: <b>portaldoeducador.com.br</b>`;
+      }
+
+      // bloqueia o resto do app
+      const admin = document.getElementById('adminUI');
+      const tv = document.getElementById('tvUI');
+      if(admin) admin.style.display = 'none';
+      if(tv) tv.style.display = 'none';
+    }
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', display);
+    } else {
+      display();
+    }
+  }
+
+  // EXECUTA A VERIFICAÇÃO
+  const info = checkAccess();
+  window.__GUARD_INFO__ = info; // para debug
+
+  if(!info.allowed){
+    showGuard(info);
+    // bloqueia execução do resto do app
+    window.__ACCESS_BLOCKED__ = true;
+  }
+})();
+</script>
+</head>
+<body>
+
+<!-- ============================================================
+     ACCESS GUARD — Tela de bloqueio NEWPC
+     ============================================================ -->
+<div class="guard" id="accessGuard">
+  <div class="guard-bg"></div>
+
+  <div class="guard-mark">
+    <div class="guard-mark-logo">PE</div>
+    <div class="guard-mark-text">
+      <strong>Portal do Educador <span style="color:#00D4FF">TV</span></strong>
+      <small>NEWPC TECNOLOGIA · DIGITAL SIGNAGE</small>
+    </div>
+  </div>
+
+  <div class="guard-icon">🔒</div>
+
+  <h1>Esta aplicação é <span>licenciada</span><br>e operada pelo Portal do Educador</h1>
+
+  <p class="guard-lead">
+    Você acessou um link direto que está restrito ao domínio oficial.
+    O <b>Portal do Educador TV</b> é uma solução proprietária da <b>NEWPC Tecnologia</b>
+    para sinalização digital em escolas, secretarias e prefeituras.
+  </p>
+
+  <div class="guard-card">
+    <h3>Como acessar</h3>
+    <p>👉 Use o domínio oficial: <strong id="guardOfficialDomain">portaldoeducador.com.br</strong></p>
+    <p>👉 Ou solicite uma licença comercial para sua escola/prefeitura.</p>
+    <div class="guard-detail" id="guardDetail">Verificando origem...</div>
+  </div>
+
+  <div class="guard-card">
+    <h3>Para Prefeituras e Secretarias</h3>
+    <p>Soluções de <b>sinalização digital institucional</b> com:</p>
+    <p style="padding-left:14px;font-size:13px;color:#8A93A8">
+      • Painéis verticais e horizontais para hall e recepção<br>
+      • Avisos automáticos integrados ao sistema da SME<br>
+      • RSS de notícias, agendamento por turno, multi-playlist<br>
+      • Operação 24/7 com modo kiosk e watchdog<br>
+      • Suporte técnico e garantia NEWPC
+    </p>
+  </div>
+
+  <div class="guard-actions">
+    <a href="https://portaldoeducador.com.br" class="guard-btn">
+      Acessar Portal do Educador →
+    </a>
+    <a href="https://wa.me/5567000000000?text=Ol%C3%A1%2C%20tenho%20interesse%20no%20Portal%20do%20Educador%20TV%20para%20minha%20institui%C3%A7%C3%A3o."
+       class="guard-btn secondary">
+      💬 Solicitar Licença
+    </a>
+  </div>
+
+  <div class="guard-footer">
+    NEWPC TECNOLOGIA · CAMPO GRANDE · MS<br>
+    <a href="https://newpc.com.br">www.newpc.com.br</a>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     ADMIN INTERFACE
+     ============================================================ -->
+<div class="admin" id="adminUI">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">PE</div>
+      <div class="brand-text">
+        <span>Portal do Educador <span style="color:var(--brand)">TV</span></span>
+        <small>DIGITAL SIGNAGE · v4.0</small>
+      </div>
+    </div>
+    <div class="topbar-sep"></div>
+    <div class="tabs">
+      <button class="tab active" data-view="content">▦ Conteúdo</button>
+      <button class="tab" data-view="settings">⚙ Configurações</button>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-icon" title="Importar Playlist (.json)" onclick="importPlaylist()">↓</button>
+      <button class="btn btn-icon" title="Exportar Playlist (.json)" onclick="exportPlaylist()">↑</button>
+      <input type="file" id="importFile" accept=".json" class="hide">
+      <button class="btn btn-launch" onclick="launchPlayer()">▶ ABRIR TV</button>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- COLUNA ESQUERDA: PLAYLISTS + AGENDA -->
+    <aside class="col col-left">
+      <div class="section">
+        <div class="section-label">Playlists</div>
+      </div>
+      <div class="pl-list" id="playlistList"></div>
+
+      <div class="section">
+        <div class="section-label">Nova Playlist</div>
+        <div class="field">
+          <input type="text" id="newPlName" placeholder="Ex.: Avisos Manhã">
+        </div>
+        <button class="btn btn-primary" onclick="createPlaylist()" style="width:100%">+ Criar Playlist</button>
+      </div>
+
+      <div class="section">
+        <div class="section-label">Agendamento</div>
+      </div>
+      <div class="sched-block">
+        <label class="sched-toggle">
+          <input type="checkbox" id="schedEnabled" onchange="saveSchedule()">
+          <div class="switch"></div>
+          <span>Trocar playlist por horário</span>
+        </label>
+        <div class="hint" style="margin-bottom:10px">Define qual playlist toca em cada turno. Verificação a cada 60s.</div>
+        <div class="field">
+          <label>Manhã (a partir de)</label>
+          <div class="sched-row">
+            <input type="time" id="schedMorningStart" value="06:00" onchange="saveSchedule()">
+            <span class="sched-arrow">→</span>
+            <select id="schedMorningPL" onchange="saveSchedule()"></select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Tarde (a partir de)</label>
+          <div class="sched-row">
+            <input type="time" id="schedAfternoonStart" value="12:00" onchange="saveSchedule()">
+            <span class="sched-arrow">→</span>
+            <select id="schedAfternoonPL" onchange="saveSchedule()"></select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Noite (a partir de)</label>
+          <div class="sched-row">
+            <input type="time" id="schedEveningStart" value="18:00" onchange="saveSchedule()">
+            <span class="sched-arrow">→</span>
+            <select id="schedEveningPL" onchange="saveSchedule()"></select>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- COLUNA CENTRO: EDITOR -->
+    <main class="col">
+
+      <!-- VIEW: CONTEÚDO -->
+      <div class="view active" data-view="content">
+        <div class="editor-grid">
+
+          <div class="editor-card">
+            <h3>📹 Adicionar Item <span class="badge">PASSO 1</span></h3>
+
+            <div class="field">
+              <label>Tipo de Mídia</label>
+              <div class="media-tabs">
+                <button class="media-tab active" data-mtab="upload">Upload</button>
+                <button class="media-tab" data-mtab="url">URL Externa</button>
+                <button class="media-tab" data-mtab="youtube">YouTube</button>
+              </div>
+            </div>
+
+            <div class="mtab-panel" data-mtab-panel="upload">
+              <div class="field">
+                <label>Arquivo (JPG, PNG, MP4) · até 50MB</label>
+                <input type="file" id="mediaFile" accept="image/*,video/mp4">
+              </div>
+            </div>
+            <div class="mtab-panel hide" data-mtab-panel="url">
+              <div class="field">
+                <label>URL da Imagem ou Vídeo</label>
+                <input type="url" id="mediaURL" placeholder="https://exemplo.com/imagem.jpg">
+                <div class="hint">Suporta links diretos para .jpg, .png, .gif, .mp4, .webm</div>
+              </div>
+            </div>
+            <div class="mtab-panel hide" data-mtab-panel="youtube">
+              <div class="field">
+                <label>URL do YouTube</label>
+                <input type="url" id="mediaYT" placeholder="https://youtube.com/watch?v=...">
+                <div class="hint">Vídeos do YouTube tocam em loop, sem som, sem controles</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="editor-card">
+            <h3>✎ Texto e Tempo <span class="badge">PASSO 2</span></h3>
+            <div class="field">
+              <label>Eyebrow / Categoria (opcional)</label>
+              <input type="text" id="itemEyebrow" placeholder="Ex.: AVISO IMPORTANTE">
+            </div>
+            <div class="field">
+              <label>Título Principal</label>
+              <input type="text" id="itemTitle" placeholder="Ex.: Reunião de Pais e Mestres">
+            </div>
+            <div class="field">
+              <label>Descrição Lateral</label>
+              <textarea id="itemDesc" rows="3" placeholder="Texto que aparece ao lado da mídia (modo split)"></textarea>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Duração (segundos)</label>
+                <input type="number" id="itemDur" value="10" min="3" max="300">
+              </div>
+              <div class="field">
+                <label>Layout</label>
+                <select id="itemLayout">
+                  <option value="split">Split (mídia + texto)</option>
+                  <option value="full">Tela Cheia</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="editor-actions">
+          <button class="btn btn-primary" onclick="addItemToPlaylist()" style="flex:1;justify-content:center">+ Adicionar à Playlist Atual</button>
+          <button class="btn" onclick="clearForm()">Limpar</button>
+        </div>
+      </div>
+
+      <!-- VIEW: SETTINGS -->
+      <div class="view" data-view="settings">
+        <div class="settings-grid">
+
+          <div class="settings-card">
+            <h3>📺 Orientação da TV</h3>
+            <div class="field">
+              <label>Modo de Exibição</label>
+              <select id="cfgOrientation">
+                <option value="auto">Automático (detecta pela tela)</option>
+                <option value="landscape">Forçar Horizontal (16:9)</option>
+                <option value="portrait">Forçar Vertical (9:16) — totem/hall</option>
+              </select>
+              <div class="hint">
+                <b>Auto:</b> ideal — detecta pela proporção da tela.<br>
+                <b>Horizontal:</b> TVs de recepção e sala de professores.<br>
+                <b>Vertical:</b> totens digitais, hall de prefeituras, painéis em pé.
+              </div>
+            </div>
+            <div class="field">
+              <label>Resolução Detectada</label>
+              <input type="text" id="cfgResolution" readonly style="font-family:var(--mono);font-size:11px">
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h3>🎨 Identidade Visual</h3>
+            <div class="field">
+              <label>Logo Institucional (opcional)</label>
+              <input type="file" id="logoFile" accept="image/*" onchange="saveLogo(this)">
+              <div class="hint">PNG ou SVG transparente. Aparece no topo da área lateral.</div>
+              <div id="logoPreview" style="margin-top:10px"></div>
+            </div>
+            <div class="field">
+              <label>Nome da Marca (rodapé)</label>
+              <input type="text" id="cfgBrandName" placeholder="PORTAL DO EDUCADOR TV">
+            </div>
+            <div class="field">
+              <label>URL / Site (rodapé)</label>
+              <input type="text" id="cfgBrandUrl" placeholder="WWW.PORTALDOEDUCADOR.COM.BR">
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h3>📍 Localização</h3>
+            <div class="field">
+              <label>Cidade Exibida</label>
+              <input type="text" id="cfgCity" placeholder="CAMPO GRANDE, MS">
+            </div>
+            <div class="field">
+              <label>Latitude</label>
+              <input type="text" id="cfgLat" placeholder="-20.4697">
+            </div>
+            <div class="field">
+              <label>Longitude</label>
+              <input type="text" id="cfgLon" placeholder="-54.6201">
+              <div class="hint">Usado para temperatura via Open-Meteo. Deixe vazio para detectar automaticamente.</div>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h3>📰 Letreiro (Rodapé)</h3>
+            <div class="field">
+              <label>Texto Fixo</label>
+              <textarea id="cfgTicker" rows="3" placeholder="Mensagem que rola no rodapé..."></textarea>
+            </div>
+            <div class="field">
+              <label>Fonte RSS (opcional)</label>
+              <input type="url" id="cfgRSS" placeholder="https://news.google.com/rss/search?q=educacao&hl=pt-BR">
+              <div class="hint">URL de RSS público. Usa rss2json (limite gratuito). Atualiza a cada 30min.</div>
+            </div>
+            <div class="field">
+              <label>Velocidade (segundos para 1 ciclo)</label>
+              <input type="number" id="cfgTickerSpeed" value="40" min="10" max="120">
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h3>🛡️ Modo Operacional</h3>
+            <div class="field">
+              <label class="sched-toggle" style="margin:0">
+                <input type="checkbox" id="cfgKiosk" checked>
+                <div class="switch"></div>
+                <span>Modo Kiosk (fullscreen automático)</span>
+              </label>
+            </div>
+            <div class="field">
+              <label class="sched-toggle" style="margin:0">
+                <input type="checkbox" id="cfgWatchdog" checked>
+                <div class="switch"></div>
+                <span>Watchdog (auto-restart se travar)</span>
+              </label>
+              <div class="hint">Reinicia o player se nenhum item avançar por 60s.</div>
+            </div>
+            <div class="field">
+              <label class="sched-toggle" style="margin:0">
+                <input type="checkbox" id="cfgKenburns" checked>
+                <div class="switch"></div>
+                <span>Efeito Ken Burns em imagens</span>
+              </label>
+            </div>
+            <div class="field">
+              <label class="sched-toggle" style="margin:0">
+                <input type="checkbox" id="cfgProgress" checked>
+                <div class="switch"></div>
+                <span>Barra de progresso</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="settings-card" style="grid-column:1/-1">
+            <h3>💾 Dados</h3>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn" onclick="exportPlaylist()">↑ Exportar Playlist Atual</button>
+              <button class="btn" onclick="exportAll()">↑ Exportar TUDO (backup)</button>
+              <button class="btn" onclick="importPlaylist()">↓ Importar Playlist</button>
+              <button class="btn btn-danger" onclick="confirmReset()">⚠ Resetar Aplicativo</button>
+            </div>
+          </div>
+
+          <div class="settings-card" style="grid-column:1/-1">
+            <h3>🔗 URL do Player Standalone</h3>
+            <div class="field">
+              <label>Use esta URL para abrir SOMENTE o player (ideal para TVs dedicadas)</label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input type="text" id="playerURL" readonly style="font-family:var(--mono);font-size:12px">
+                <button class="btn" onclick="copyPlayerURL()">Copiar</button>
+              </div>
+              <div class="hint">Esta URL ignora a interface admin e abre direto em modo TV. Configure como home page do navegador na TV.</div>
+            </div>
+          </div>
+
+        </div>
+
+        <div style="padding:0 18px 18px">
+          <button class="btn btn-primary" onclick="saveSettings()">💾 Salvar Configurações</button>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- COLUNA DIREITA: QUEUE -->
+    <aside class="col col-right">
+      <div class="queue-header">
+        <div>
+          <div class="queue-title" id="queueTitle">Playlist</div>
+          <div class="queue-meta" id="queueMeta">0 itens · 00:00</div>
+        </div>
+        <button class="btn btn-icon btn-danger" onclick="confirmClearPlaylist()" title="Limpar Playlist">🗑</button>
+      </div>
+      <div class="queue-list" id="queueList"></div>
+    </aside>
+
+  </div>
+
+  <!-- STATUS BAR -->
+  <footer class="statusbar">
+    <div class="status-item"><div class="status-dot" id="dbStatus"></div><span id="dbStatusText">DB OK</span></div>
+    <div class="status-item"><span id="storageUsed">─</span></div>
+    <div class="status-item" style="margin-left:auto"><span id="weatherStatus">CLIMA: aguardando</span></div>
+    <div class="status-item"><span id="rssStatus">RSS: desativado</span></div>
+    <div class="status-item"><span id="orientStatus">─</span></div>
+    <div class="status-item"><span id="tickClock">--:--:--</span></div>
+  </footer>
+</div>
+
+
+<!-- ============================================================
+     PLAYER FULLSCREEN
+     ============================================================ -->
+<div class="tv" id="tvUI">
+  <div class="tv-stage" id="tvStage">
+    <div class="tv-media" id="tvMedia"></div>
+    <div class="tv-side" id="tvSide">
+      <div id="tvLogoSlot" class="tv-logo-placeholder">PORTAL DO EDUCADOR</div>
+      <div class="tv-eyebrow" id="tvEyebrow">EM DESTAQUE</div>
+      <h1 class="tv-title" id="tvTitle">—</h1>
+      <p class="tv-desc" id="tvDesc">—</p>
+      <div class="tv-meta">
+        <div>
+          <div class="tv-meta-loc" id="tvLoc">CAMPO GRANDE · MS</div>
+          <div class="tv-clock" id="tvClock">00:00</div>
+          <div class="tv-date" id="tvDate">—</div>
+        </div>
+        <div class="tv-temp" id="tvTemp">--°</div>
+      </div>
+    </div>
+    <div class="tv-overlay">
+      <div class="tv-eyebrow" id="tvEyebrowFull">EM DESTAQUE</div>
+      <h1 class="tv-title" id="tvTitleFull">—</h1>
+    </div>
+    <div class="tv-progress"><div class="tv-progress-bar" id="tvProgressBar"></div></div>
+    <div class="tv-standby hide" id="tvStandby">
+      <div class="tv-standby-mark">PORTAL DO EDUCADOR · TV</div>
+      <h1>Aguardando playlist</h1>
+      <p>Pressione <b>ESC</b> para voltar à administração</p>
+    </div>
+  </div>
+  <div class="tv-footer">
+    <div class="tv-ticker">
+      <div class="tv-ticker-track" id="tvTicker"></div>
+    </div>
+    <div class="tv-brand">
+      <div class="tv-brand-name" id="tvBrandName">PORTAL DO EDUCADOR TV</div>
+      <div class="tv-brand-url" id="tvBrandUrl">WWW.PORTALDOEDUCADOR.COM.BR</div>
+    </div>
+  </div>
+</div>
+
+<div class="tv-hint" id="tvHint">ESC: sair · F: fullscreen · ← →: navegar · SPACE: pausar · R: rotação</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h3 id="modalTitle">Confirmar</h3>
+    <p id="modalText">—</p>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-danger" id="modalConfirm">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOASTS -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+
+<script>
+/* ============================================================
+   PORTAL DO EDUCADOR TV — v4.0
+   Digital Signage Suite (Vanilla JS, IndexedDB, Zero deps)
+   ============================================================ */
+
+const APP = {
+  db: null,
+  state: {
+    currentPlaylistId: null,
+    settings: {},
+    schedule: {},
+  },
+  player: {
+    timer: null,
+    progressTimer: null,
+    watchdogTimer: null,
+    rssTimer: null,
+    scheduleTimer: null,
+    items: [],
+    idx: 0,
+    paused: false,
+    lastTick: 0,
+  }
+};
+
+/* ----------- INDEXEDDB ----------- */
+const DB_NAME = 'PortalEducadorTV_v4';
+const DB_VERSION = 1;
+
+function openDB(){
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if(!db.objectStoreNames.contains('playlists')){
+        db.createObjectStore('playlists', {keyPath:'id', autoIncrement:true});
+      }
+      if(!db.objectStoreNames.contains('items')){
+        const s = db.createObjectStore('items', {keyPath:'id', autoIncrement:true});
+        s.createIndex('playlistId', 'playlistId', {unique:false});
+      }
+      if(!db.objectStoreNames.contains('settings')){
+        db.createObjectStore('settings', {keyPath:'key'});
+      }
+    };
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror = e => reject(e);
+  });
+}
+
+function tx(stores, mode='readonly'){
+  return APP.db.transaction(stores, mode);
+}
+function store(name, mode='readonly'){
+  return tx([name], mode).objectStore(name);
+}
+function awaitReq(req){
+  return new Promise((res, rej) => {
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => rej(req.error);
+  });
+}
+
+/* ----------- DATA LAYER ----------- */
+async function getAllPlaylists(){
+  return awaitReq(store('playlists').getAll());
+}
+async function createPlaylistDB(name){
+  const id = await awaitReq(store('playlists','readwrite').add({name, createdAt:Date.now()}));
+  return id;
+}
+async function deletePlaylistDB(id){
+  // delete items first
+  const items = await getItemsByPlaylist(id);
+  const t = tx(['items','playlists'],'readwrite');
+  const itemStore = t.objectStore('items');
+  for(const it of items) itemStore.delete(it.id);
+  t.objectStore('playlists').delete(id);
+}
+async function renamePlaylistDB(id, name){
+  const pl = await awaitReq(store('playlists','readwrite').get(id));
+  if(pl){ pl.name = name; await awaitReq(store('playlists','readwrite').put(pl)); }
+}
+async function getItemsByPlaylist(playlistId){
+  return new Promise((res, rej) => {
+    const idx = store('items').index('playlistId');
+    const req = idx.getAll(playlistId);
+    req.onsuccess = () => {
+      const items = req.result.sort((a,b) => (a.order||0) - (b.order||0));
+      res(items);
+    };
+    req.onerror = () => rej(req.error);
+  });
+}
+async function addItemDB(item){
+  return awaitReq(store('items','readwrite').add(item));
+}
+async function updateItemDB(item){
+  return awaitReq(store('items','readwrite').put(item));
+}
+async function deleteItemDB(id){
+  return awaitReq(store('items','readwrite').delete(id));
+}
+async function clearPlaylistItems(playlistId){
+  const items = await getItemsByPlaylist(playlistId);
+  const s = store('items','readwrite');
+  for(const it of items) s.delete(it.id);
+}
+async function getSetting(key, fallback=null){
+  const r = await awaitReq(store('settings').get(key));
+  return r ? r.value : fallback;
+}
+async function setSetting(key, value){
+  return awaitReq(store('settings','readwrite').put({key, value}));
+}
+
+/* ----------- INIT ----------- */
+window.addEventListener('DOMContentLoaded', async () => {
+  // Se o access guard bloqueou, não inicializa nada
+  if(window.__ACCESS_BLOCKED__) return;
+
+  try {
+    APP.db = await openDB();
+    setStatus('dbStatus','dbStatusText','DB OK',true);
+
+    await loadSettingsToUI();
+    await ensureFirstPlaylist();
+    await refreshPlaylistList();
+    await loadSchedule();
+
+    document.getElementById('playerURL').value = location.href.split('#')[0] + '#tv';
+
+    setupTabs();
+    setupMediaTabs();
+    setupHotkeys();
+    setupDragAndDrop();
+    setupImportFile();
+
+    // CLOCK + ORIENT
+    setInterval(() => {
+      document.getElementById('tickClock').textContent = new Date().toLocaleTimeString('pt-BR');
+    }, 1000);
+
+    const updateOrient = () => {
+      const w = window.innerWidth, h = window.innerHeight;
+      const detected = w >= h ? 'HORIZONTAL' : 'VERTICAL';
+      const mode = (APP.state.settings.orientation || 'auto').toUpperCase();
+      document.getElementById('orientStatus').textContent =
+        `TELA: ${w}×${h} · ${detected}${mode !== 'AUTO' ? ' · FORÇADO:' + mode : ''}`;
+    };
+    updateOrient();
+    window.addEventListener('resize', updateOrient);
+
+    // ROUTING
+    if(location.hash === '#tv'){
+      // standalone player mode
+      await launchPlayer(true);
+    }
+
+    updateStorageUsage();
+    initWeather();
+    initRSS();
+  } catch(e){
+    console.error(e);
+    setStatus('dbStatus','dbStatusText','DB ERRO', false);
+    toast('Erro ao iniciar banco de dados','err');
+  }
+});
+
+async function ensureFirstPlaylist(){
+  const lists = await getAllPlaylists();
+  if(lists.length === 0){
+    const id = await createPlaylistDB('Playlist Principal');
+    APP.state.currentPlaylistId = id;
+  } else {
+    const last = await getSetting('lastPlaylistId');
+    APP.state.currentPlaylistId = (last && lists.find(l => l.id === last)) ? last : lists[0].id;
+  }
+}
+
+/* ----------- UI: TABS ----------- */
+function setupTabs(){
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.querySelector(`.view[data-view="${t.dataset.view}"]`).classList.add('active');
+    });
+  });
+}
+function setupMediaTabs(){
+  document.querySelectorAll('.media-tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.media-tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      document.querySelectorAll('.mtab-panel').forEach(p => p.classList.add('hide'));
+      document.querySelector(`.mtab-panel[data-mtab-panel="${t.dataset.mtab}"]`).classList.remove('hide');
+    });
+  });
+}
+
+/* ----------- PLAYLIST UI ----------- */
+async function refreshPlaylistList(){
+  const lists = await getAllPlaylists();
+  const box = document.getElementById('playlistList');
+  box.innerHTML = '';
+  for(const pl of lists){
+    const items = await getItemsByPlaylist(pl.id);
+    const el = document.createElement('div');
+    el.className = 'pl-item' + (pl.id === APP.state.currentPlaylistId ? ' active' : '');
+    el.innerHTML = `
+      <div class="pl-dot"></div>
+      <div class="pl-name">${escapeHTML(pl.name)}</div>
+      <div class="pl-count">${items.length}</div>
+    `;
+    el.addEventListener('click', () => selectPlaylist(pl.id));
+    el.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      playlistContextMenu(pl);
+    });
+    box.appendChild(el);
+  }
+  await refreshScheduleSelects();
+  await refreshQueue();
+}
+
+async function selectPlaylist(id){
+  APP.state.currentPlaylistId = id;
+  await setSetting('lastPlaylistId', id);
+  await refreshPlaylistList();
+}
+
+async function createPlaylist(){
+  const input = document.getElementById('newPlName');
+  const name = input.value.trim();
+  if(!name){ toast('Informe um nome para a playlist','err'); return; }
+  const id = await createPlaylistDB(name);
+  input.value = '';
+  APP.state.currentPlaylistId = id;
+  await setSetting('lastPlaylistId', id);
+  await refreshPlaylistList();
+  toast(`Playlist "${name}" criada`,'ok');
+}
+
+async function playlistContextMenu(pl){
+  const action = prompt(`Playlist "${pl.name}"\n\n1. Renomear\n2. Excluir\n\nDigite 1 ou 2:`);
+  if(action === '1'){
+    const newName = prompt('Novo nome:', pl.name);
+    if(newName && newName.trim()){
+      await renamePlaylistDB(pl.id, newName.trim());
+      await refreshPlaylistList();
+      toast('Playlist renomeada','ok');
+    }
+  } else if(action === '2'){
+    if(confirm(`Excluir playlist "${pl.name}" e todos os ${(await getItemsByPlaylist(pl.id)).length} itens?`)){
+      await deletePlaylistDB(pl.id);
+      const lists = await getAllPlaylists();
+      if(lists.length === 0){
+        const id = await createPlaylistDB('Playlist Principal');
+        APP.state.currentPlaylistId = id;
+      } else {
+        APP.state.currentPlaylistId = lists[0].id;
+      }
+      await setSetting('lastPlaylistId', APP.state.currentPlaylistId);
+      await refreshPlaylistList();
+      toast('Playlist excluída','ok');
+    }
+  }
+}
+
+/* ----------- QUEUE ----------- */
+async function refreshQueue(){
+  const lists = await getAllPlaylists();
+  const cur = lists.find(l => l.id === APP.state.currentPlaylistId);
+  document.getElementById('queueTitle').textContent = cur ? cur.name : 'Playlist';
+
+  const items = await getItemsByPlaylist(APP.state.currentPlaylistId);
+  const totalSec = items.reduce((s,i) => s + (i.dur||10), 0);
+  document.getElementById('queueMeta').textContent =
+    `${items.length} ${items.length === 1 ? 'item' : 'itens'} · ${formatDuration(totalSec)}`;
+
+  const box = document.getElementById('queueList');
+  if(items.length === 0){
+    box.innerHTML = `<div class="queue-empty">
+      <div class="queue-empty-icon">📋</div>
+      <div>Nenhum item na playlist.</div>
+      <div style="margin-top:6px;font-size:11px">Use o painel central para adicionar.</div>
+    </div>`;
+    return;
+  }
+
+  box.innerHTML = '';
+  items.forEach((it, idx) => {
+    const el = document.createElement('div');
+    el.className = 'queue-item';
+    el.draggable = true;
+    el.dataset.id = it.id;
+    el.dataset.idx = idx;
+
+    const thumb = it.mediaType === 'video' ? '▶' :
+                  it.mediaType === 'youtube' ? '▶' :
+                  it.mediaType === 'url-image' ? '🖼' : '🖼';
+
+    let thumbHTML = `<div class="qi-thumb">${thumb}</div>`;
+    if(it.mediaType === 'image' && it.mediaData){
+      thumbHTML = `<div class="qi-thumb"><img src="${it.mediaData}" alt=""></div>`;
+    } else if(it.mediaType === 'url-image' && it.mediaURL){
+      thumbHTML = `<div class="qi-thumb"><img src="${it.mediaURL}" alt="" onerror="this.parentNode.textContent='🖼'"></div>`;
+    }
+
+    el.innerHTML = `
+      ${thumbHTML}
+      <div class="qi-info">
+        <div class="qi-title">${escapeHTML(it.title || 'Sem título')}</div>
+        <div class="qi-meta">
+          <span>⏱ ${it.dur}s</span>
+          <span>${it.layout === 'full' ? '⛶ Full' : '◫ Split'}</span>
+          <span>${mediaTypeLabel(it.mediaType)}</span>
+        </div>
+      </div>
+      <div class="qi-actions">
+        <button class="qi-btn" onclick="moveItem(${it.id}, -1)" title="Subir">▲</button>
+        <button class="qi-btn" onclick="moveItem(${it.id}, 1)" title="Descer">▼</button>
+        <button class="qi-btn danger" onclick="removeItem(${it.id})" title="Remover">✕</button>
+      </div>
+    `;
+    box.appendChild(el);
+  });
+}
+
+function setupDragAndDrop(){
+  const box = document.getElementById('queueList');
+  let draggedEl = null;
+
+  box.addEventListener('dragstart', e => {
+    if(!e.target.classList.contains('queue-item')) return;
+    draggedEl = e.target;
+    e.target.classList.add('dragging');
+  });
+  box.addEventListener('dragend', e => {
+    if(e.target.classList.contains('queue-item')) e.target.classList.remove('dragging');
+    document.querySelectorAll('.queue-item').forEach(el => el.classList.remove('drag-over'));
+  });
+  box.addEventListener('dragover', e => {
+    e.preventDefault();
+    const target = e.target.closest('.queue-item');
+    if(target && target !== draggedEl){
+      document.querySelectorAll('.queue-item').forEach(el => el.classList.remove('drag-over'));
+      target.classList.add('drag-over');
+    }
+  });
+  box.addEventListener('drop', async e => {
+    e.preventDefault();
+    const target = e.target.closest('.queue-item');
+    if(!target || !draggedEl || target === draggedEl) return;
+
+    const fromId = parseInt(draggedEl.dataset.id);
+    const toId = parseInt(target.dataset.id);
+    await reorderItems(fromId, toId);
+    await refreshQueue();
+  });
+}
+
+async function reorderItems(fromId, toId){
+  const items = await getItemsByPlaylist(APP.state.currentPlaylistId);
+  const fromIdx = items.findIndex(i => i.id === fromId);
+  const toIdx = items.findIndex(i => i.id === toId);
+  if(fromIdx < 0 || toIdx < 0) return;
+  const [moved] = items.splice(fromIdx, 1);
+  items.splice(toIdx, 0, moved);
+  for(let i = 0; i < items.length; i++){
+    items[i].order = i;
+    await updateItemDB(items[i]);
+  }
+}
+
+window.moveItem = async (id, delta) => {
+  const items = await getItemsByPlaylist(APP.state.currentPlaylistId);
+  const idx = items.findIndex(i => i.id === id);
+  const newIdx = idx + delta;
+  if(idx < 0 || newIdx < 0 || newIdx >= items.length) return;
+  const [m] = items.splice(idx, 1);
+  items.splice(newIdx, 0, m);
+  for(let i = 0; i < items.length; i++){
+    items[i].order = i;
+    await updateItemDB(items[i]);
+  }
+  await refreshQueue();
+};
+
+window.removeItem = async (id) => {
+  if(!confirm('Remover este item da playlist?')) return;
+  await deleteItemDB(id);
+  await refreshQueue();
+  await refreshPlaylistList();
+  updateStorageUsage();
+};
+
+function confirmClearPlaylist(){
+  showModal({
+    title:'Limpar Playlist',
+    text:'Remover TODOS os itens da playlist atual? Esta ação não pode ser desfeita.',
+    onConfirm: async () => {
+      await clearPlaylistItems(APP.state.currentPlaylistId);
+      await refreshQueue();
+      await refreshPlaylistList();
+      updateStorageUsage();
+      toast('Playlist limpa','ok');
+    }
+  });
+}
+
+/* ----------- ADD ITEM ----------- */
+async function addItemToPlaylist(){
+  const title = document.getElementById('itemTitle').value.trim();
+  const eyebrow = document.getElementById('itemEyebrow').value.trim();
+  const desc = document.getElementById('itemDesc').value.trim();
+  const dur = parseInt(document.getElementById('itemDur').value) || 10;
+  const layout = document.getElementById('itemLayout').value;
+
+  const activeMTab = document.querySelector('.media-tab.active').dataset.mtab;
+  let mediaType, mediaData = null, mediaURL = null;
+
+  if(activeMTab === 'upload'){
+    const file = document.getElementById('mediaFile').files[0];
+    if(!file){ toast('Selecione um arquivo','err'); return; }
+    if(file.size > 50 * 1024 * 1024){ toast('Arquivo maior que 50MB','err'); return; }
+    mediaType = file.type.startsWith('video') ? 'video' : 'image';
+    mediaData = await fileToDataURL(file);
+  } else if(activeMTab === 'url'){
+    const url = document.getElementById('mediaURL').value.trim();
+    if(!url){ toast('Informe a URL','err'); return; }
+    mediaType = /\.(mp4|webm|ogg)(\?|$)/i.test(url) ? 'url-video' : 'url-image';
+    mediaURL = url;
+  } else if(activeMTab === 'youtube'){
+    const yt = document.getElementById('mediaYT').value.trim();
+    if(!yt){ toast('Informe a URL do YouTube','err'); return; }
+    const vid = extractYouTubeId(yt);
+    if(!vid){ toast('URL do YouTube inválida','err'); return; }
+    mediaType = 'youtube';
+    mediaURL = vid;
+  }
+
+  if(!title && !desc){
+    if(!confirm('Item sem título e sem descrição. Adicionar mesmo assim?')) return;
+  }
+
+  const items = await getItemsByPlaylist(APP.state.currentPlaylistId);
+  const order = items.length;
+
+  await addItemDB({
+    playlistId: APP.state.currentPlaylistId,
+    title, eyebrow, desc, dur, layout,
+    mediaType, mediaData, mediaURL,
+    order,
+    createdAt: Date.now()
+  });
+
+  clearForm();
+  await refreshQueue();
+  await refreshPlaylistList();
+  updateStorageUsage();
+  toast(`Item adicionado · ${title || 'sem título'}`,'ok');
+}
+
+function clearForm(){
+  document.getElementById('itemTitle').value = '';
+  document.getElementById('itemEyebrow').value = '';
+  document.getElementById('itemDesc').value = '';
+  document.getElementById('itemDur').value = 10;
+  document.getElementById('itemLayout').value = 'split';
+  document.getElementById('mediaFile').value = '';
+  document.getElementById('mediaURL').value = '';
+  document.getElementById('mediaYT').value = '';
+}
+
+/* ----------- SETTINGS ----------- */
+async function loadSettingsToUI(){
+  const s = APP.state.settings = {
+    brandName: await getSetting('brandName','PORTAL DO EDUCADOR TV'),
+    brandUrl: await getSetting('brandUrl','WWW.PORTALDOEDUCADOR.COM.BR'),
+    city: await getSetting('city','CAMPO GRANDE · MS'),
+    lat: await getSetting('lat',''),
+    lon: await getSetting('lon',''),
+    ticker: await getSetting('ticker','PORTAL DO EDUCADOR TV · INOVAÇÃO · TECNOLOGIA · BEM-VINDOS'),
+    rss: await getSetting('rss',''),
+    tickerSpeed: await getSetting('tickerSpeed', 40),
+    kiosk: await getSetting('kiosk', true),
+    watchdog: await getSetting('watchdog', true),
+    kenburns: await getSetting('kenburns', true),
+    progress: await getSetting('progress', true),
+    orientation: await getSetting('orientation', 'auto'),
+    logo: await getSetting('logo', null),
+  };
+  document.getElementById('cfgBrandName').value = s.brandName;
+  document.getElementById('cfgBrandUrl').value = s.brandUrl;
+  document.getElementById('cfgCity').value = s.city;
+  document.getElementById('cfgLat').value = s.lat;
+  document.getElementById('cfgLon').value = s.lon;
+  document.getElementById('cfgTicker').value = s.ticker;
+  document.getElementById('cfgRSS').value = s.rss;
+  document.getElementById('cfgTickerSpeed').value = s.tickerSpeed;
+  document.getElementById('cfgKiosk').checked = !!s.kiosk;
+  document.getElementById('cfgWatchdog').checked = !!s.watchdog;
+  document.getElementById('cfgKenburns').checked = !!s.kenburns;
+  document.getElementById('cfgProgress').checked = !!s.progress;
+  document.getElementById('cfgOrientation').value = s.orientation || 'auto';
+
+  // mostrar resolução detectada e atualizar em resize
+  const updateResDisplay = () => {
+    const w = window.innerWidth, h = window.innerHeight;
+    const ratio = (w/h).toFixed(2);
+    const detected = w >= h ? 'HORIZONTAL' : 'VERTICAL';
+    document.getElementById('cfgResolution').value = `${w} × ${h} px · ratio ${ratio} · ${detected}`;
+  };
+  updateResDisplay();
+  window.addEventListener('resize', updateResDisplay);
+
+  if(s.logo){
+    document.getElementById('logoPreview').innerHTML =
+      `<img src="${s.logo}" style="max-height:48px;max-width:160px;background:#fff;padding:6px;border-radius:6px">`;
+  }
+}
+
+async function saveSettings(){
+  const fields = {
+    brandName: document.getElementById('cfgBrandName').value,
+    brandUrl: document.getElementById('cfgBrandUrl').value,
+    city: document.getElementById('cfgCity').value,
+    lat: document.getElementById('cfgLat').value,
+    lon: document.getElementById('cfgLon').value,
+    ticker: document.getElementById('cfgTicker').value,
+    rss: document.getElementById('cfgRSS').value,
+    tickerSpeed: parseInt(document.getElementById('cfgTickerSpeed').value) || 40,
+    kiosk: document.getElementById('cfgKiosk').checked,
+    watchdog: document.getElementById('cfgWatchdog').checked,
+    kenburns: document.getElementById('cfgKenburns').checked,
+    progress: document.getElementById('cfgProgress').checked,
+    orientation: document.getElementById('cfgOrientation').value,
+  };
+  for(const [k,v] of Object.entries(fields)){
+    await setSetting(k, v);
+    APP.state.settings[k] = v;
+  }
+  toast('Configurações salvas','ok');
+  initRSS();
+  initWeather();
+  applyOrientation();
+}
+
+async function saveLogo(input){
+  const file = input.files[0];
+  if(!file) return;
+  if(file.size > 2 * 1024 * 1024){ toast('Logo maior que 2MB','err'); return; }
+  const data = await fileToDataURL(file);
+  await setSetting('logo', data);
+  APP.state.settings.logo = data;
+  document.getElementById('logoPreview').innerHTML =
+    `<img src="${data}" style="max-height:48px;max-width:160px;background:#fff;padding:6px;border-radius:6px">`;
+  toast('Logo salva','ok');
+}
+
+/* ----------- SCHEDULE ----------- */
+async function loadSchedule(){
+  const s = await getSetting('schedule', {
+    enabled: false,
+    morningStart:'06:00', morningPL: null,
+    afternoonStart:'12:00', afternoonPL: null,
+    eveningStart:'18:00', eveningPL: null
+  });
+  APP.state.schedule = s;
+  document.getElementById('schedEnabled').checked = !!s.enabled;
+  document.getElementById('schedMorningStart').value = s.morningStart;
+  document.getElementById('schedAfternoonStart').value = s.afternoonStart;
+  document.getElementById('schedEveningStart').value = s.eveningStart;
+  await refreshScheduleSelects();
+}
+async function refreshScheduleSelects(){
+  const lists = await getAllPlaylists();
+  const opts = '<option value="">— sem alteração —</option>' +
+    lists.map(l => `<option value="${l.id}">${escapeHTML(l.name)}</option>`).join('');
+  ['schedMorningPL','schedAfternoonPL','schedEveningPL'].forEach(id => {
+    const sel = document.getElementById(id);
+    const val = APP.state.schedule[id.replace('sched','').replace('PL','').toLowerCase()+'PL'];
+    sel.innerHTML = opts;
+    if(val) sel.value = val;
+  });
+}
+async function saveSchedule(){
+  const s = {
+    enabled: document.getElementById('schedEnabled').checked,
+    morningStart: document.getElementById('schedMorningStart').value,
+    morningPL: parseInt(document.getElementById('schedMorningPL').value) || null,
+    afternoonStart: document.getElementById('schedAfternoonStart').value,
+    afternoonPL: parseInt(document.getElementById('schedAfternoonPL').value) || null,
+    eveningStart: document.getElementById('schedEveningStart').value,
+    eveningPL: parseInt(document.getElementById('schedEveningPL').value) || null,
+  };
+  APP.state.schedule = s;
+  await setSetting('schedule', s);
+}
+function getActiveScheduledPlaylist(){
+  const s = APP.state.schedule;
+  if(!s || !s.enabled) return null;
+  const now = new Date();
+  const cur = now.getHours()*60 + now.getMinutes();
+  const toMin = t => { const [h,m] = (t||'00:00').split(':').map(Number); return h*60+m; };
+  const slots = [
+    {start: toMin(s.eveningStart), pl: s.eveningPL},
+    {start: toMin(s.afternoonStart), pl: s.afternoonPL},
+    {start: toMin(s.morningStart), pl: s.morningPL},
+  ];
+  for(const slot of slots){
+    if(cur >= slot.start && slot.pl) return slot.pl;
+  }
+  return null;
+}
+
+/* ----------- IMPORT/EXPORT ----------- */
+async function exportPlaylist(){
+  const lists = await getAllPlaylists();
+  const cur = lists.find(l => l.id === APP.state.currentPlaylistId);
+  const items = await getItemsByPlaylist(APP.state.currentPlaylistId);
+  const data = {
+    type:'portal-tv-playlist',
+    version:1,
+    name: cur?.name || 'Playlist',
+    exportedAt: new Date().toISOString(),
+    items: items.map(i => ({
+      title:i.title, eyebrow:i.eyebrow, desc:i.desc, dur:i.dur, layout:i.layout,
+      mediaType:i.mediaType, mediaData:i.mediaData, mediaURL:i.mediaURL, order:i.order
+    }))
+  };
+  downloadJSON(data, `playlist-${slug(cur?.name||'export')}.json`);
+  toast('Playlist exportada','ok');
+}
+
+async function exportAll(){
+  const lists = await getAllPlaylists();
+  const out = {type:'portal-tv-backup', version:1, exportedAt:new Date().toISOString(), playlists:[]};
+  for(const pl of lists){
+    const items = await getItemsByPlaylist(pl.id);
+    out.playlists.push({
+      name: pl.name,
+      items: items.map(i => ({
+        title:i.title, eyebrow:i.eyebrow, desc:i.desc, dur:i.dur, layout:i.layout,
+        mediaType:i.mediaType, mediaData:i.mediaData, mediaURL:i.mediaURL, order:i.order
+      }))
+    });
+  }
+  out.settings = APP.state.settings;
+  out.schedule = APP.state.schedule;
+  downloadJSON(out, `portal-tv-backup-${new Date().toISOString().slice(0,10)}.json`);
+  toast('Backup completo gerado','ok');
+}
+
+function setupImportFile(){
+  document.getElementById('importFile').addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if(data.type === 'portal-tv-playlist'){
+        await importPlaylistData(data);
+      } else if(data.type === 'portal-tv-backup'){
+        if(!confirm('Importar BACKUP completo? Isto adicionará todas as playlists.')) return;
+        for(const pl of data.playlists){
+          await importPlaylistData(pl);
+        }
+        toast('Backup importado','ok');
+      } else {
+        toast('Arquivo não reconhecido','err');
+      }
+    } catch(err){
+      console.error(err);
+      toast('Erro ao ler arquivo JSON','err');
+    } finally {
+      e.target.value = '';
+    }
+  });
+}
+function importPlaylist(){
+  document.getElementById('importFile').click();
+}
+async function importPlaylistData(data){
+  const id = await createPlaylistDB(data.name + ' (importada)');
+  for(const it of (data.items||[])){
+    await addItemDB({...it, playlistId: id});
+  }
+  APP.state.currentPlaylistId = id;
+  await setSetting('lastPlaylistId', id);
+  await refreshPlaylistList();
+  toast(`"${data.name}" importada com ${data.items?.length||0} itens`,'ok');
+}
+
+function confirmReset(){
+  showModal({
+    title:'Resetar Aplicativo',
+    text:'Isto vai APAGAR todas as playlists, configurações e dados. Continuar?',
+    onConfirm: async () => {
+      indexedDB.deleteDatabase(DB_NAME);
+      location.reload();
+    }
+  });
+}
+
+/* ----------- PLAYER ----------- */
+async function launchPlayer(skipChecks=false){
+  // determinar qual playlist tocar (agendada ou atual)
+  const scheduled = getActiveScheduledPlaylist();
+  const targetId = scheduled || APP.state.currentPlaylistId;
+  const items = await getItemsByPlaylist(targetId);
+
+  if(!skipChecks && items.length === 0){
+    toast('Adicione itens à playlist primeiro','err');
+    return;
+  }
+
+  document.getElementById('adminUI').style.display = 'none';
+  document.getElementById('tvUI').classList.add('show');
+
+  // aplicar orientação (auto / portrait / landscape)
+  applyOrientation();
+  window.addEventListener('resize', applyOrientation);
+
+  // brand
+  document.getElementById('tvBrandName').textContent = APP.state.settings.brandName || 'PORTAL DO EDUCADOR TV';
+  document.getElementById('tvBrandUrl').textContent = APP.state.settings.brandUrl || '';
+  document.getElementById('tvLoc').textContent = (APP.state.settings.city || 'CAMPO GRANDE · MS').toUpperCase();
+  if(APP.state.settings.logo){
+    document.getElementById('tvLogoSlot').outerHTML =
+      `<img id="tvLogoSlot" class="tv-logo" src="${APP.state.settings.logo}">`;
+  }
+
+  // ticker
+  buildTicker();
+
+  // clock
+  updateTVClock();
+  setInterval(updateTVClock, 1000);
+
+  // start
+  APP.player.items = items;
+  APP.player.idx = 0;
+  APP.player.paused = false;
+
+  if(items.length === 0){
+    document.getElementById('tvStandby').classList.remove('hide');
+  } else {
+    playItem(0);
+  }
+
+  // kiosk
+  if(APP.state.settings.kiosk){
+    try { await document.documentElement.requestFullscreen(); } catch(e){}
+  }
+
+  // watchdog
+  if(APP.state.settings.watchdog){
+    APP.player.watchdogTimer = setInterval(() => {
+      if(APP.player.paused) { APP.player.lastTick = Date.now(); return; }
+      if(Date.now() - APP.player.lastTick > 60000){
+        console.warn('Watchdog: nenhum avanço em 60s, reiniciando');
+        playItem(APP.player.idx);
+      }
+    }, 15000);
+  }
+
+  // schedule polling
+  if(APP.state.schedule.enabled){
+    APP.player.scheduleTimer = setInterval(checkScheduleChange, 60000);
+  }
+
+  // hint
+  showHint();
+}
+
+async function checkScheduleChange(){
+  const active = getActiveScheduledPlaylist();
+  if(active && active !== APP.state.currentPlaylistId){
+    const items = await getItemsByPlaylist(active);
+    if(items.length > 0){
+      APP.state.currentPlaylistId = active;
+      APP.player.items = items;
+      APP.player.idx = 0;
+      playItem(0);
+      console.log('Schedule: trocou para playlist', active);
+    }
+  }
+}
+
+function playItem(idx){
+  clearTimeout(APP.player.timer);
+  clearInterval(APP.player.progressTimer);
+  if(APP.player.items.length === 0){
+    document.getElementById('tvStandby').classList.remove('hide');
+    return;
+  }
+  document.getElementById('tvStandby').classList.add('hide');
+
+  APP.player.idx = idx;
+  APP.player.lastTick = Date.now();
+  const it = APP.player.items[idx];
+
+  const stage = document.getElementById('tvStage');
+  if(it.layout === 'full'){
+    stage.classList.add('full');
+    document.getElementById('tvEyebrowFull').textContent = it.eyebrow || '';
+    document.getElementById('tvTitleFull').textContent = it.title || '';
+    document.getElementById('tvEyebrowFull').style.display = it.eyebrow ? 'flex' : 'none';
+    document.getElementById('tvTitleFull').style.display = it.title ? 'block' : 'none';
+  } else {
+    stage.classList.remove('full');
+    document.getElementById('tvEyebrow').textContent = it.eyebrow || 'EM DESTAQUE';
+    document.getElementById('tvEyebrow').style.display = it.eyebrow ? 'flex' : 'none';
+    document.getElementById('tvTitle').textContent = it.title || '';
+    document.getElementById('tvDesc').textContent = it.desc || '';
+  }
+
+  // media
+  const mb = document.getElementById('tvMedia');
+  mb.innerHTML = '';
+  const kb = APP.state.settings.kenburns ? 'ken-burns' : '';
+
+  if(it.mediaType === 'image' && it.mediaData){
+    mb.innerHTML = `<img src="${it.mediaData}" class="${kb}">`;
+  } else if(it.mediaType === 'url-image' && it.mediaURL){
+    mb.innerHTML = `<img src="${it.mediaURL}" class="${kb}" onerror="console.warn('Falha ao carregar imagem')">`;
+  } else if(it.mediaType === 'video' && it.mediaData){
+    mb.innerHTML = `<video src="${it.mediaData}" autoplay muted loop playsinline></video>`;
+  } else if(it.mediaType === 'url-video' && it.mediaURL){
+    mb.innerHTML = `<video src="${it.mediaURL}" autoplay muted loop playsinline crossorigin="anonymous"></video>`;
+  } else if(it.mediaType === 'youtube' && it.mediaURL){
+    mb.innerHTML = `<iframe src="https://www.youtube.com/embed/${it.mediaURL}?autoplay=1&mute=1&controls=0&loop=1&playlist=${it.mediaURL}&modestbranding=1&showinfo=0&rel=0" allow="autoplay; encrypted-media" allowfullscreen frameborder="0"></iframe>`;
+  }
+
+  // progress
+  const dur = (it.dur || 10) * 1000;
+  const bar = document.getElementById('tvProgressBar');
+  bar.style.display = APP.state.settings.progress ? 'block' : 'none';
+  bar.style.width = '0%';
+  let elapsed = 0;
+  const tick = 100;
+  if(APP.state.settings.progress){
+    APP.player.progressTimer = setInterval(() => {
+      if(APP.player.paused) return;
+      elapsed += tick;
+      bar.style.width = Math.min(100, (elapsed/dur)*100) + '%';
+      APP.player.lastTick = Date.now();
+    }, tick);
+  }
+
+  APP.player.timer = setTimeout(() => {
+    nextItem();
+  }, dur);
+}
+
+function nextItem(){
+  const next = (APP.player.idx + 1) % APP.player.items.length;
+  playItem(next);
+}
+function prevItem(){
+  const prev = (APP.player.idx - 1 + APP.player.items.length) % APP.player.items.length;
+  playItem(prev);
+}
+function togglePause(){
+  APP.player.paused = !APP.player.paused;
+  if(APP.player.paused){
+    clearTimeout(APP.player.timer);
+    document.querySelectorAll('#tvMedia video').forEach(v => v.pause());
+  } else {
+    playItem(APP.player.idx);
+  }
+}
+
+function exitPlayer(){
+  clearTimeout(APP.player.timer);
+  clearInterval(APP.player.progressTimer);
+  clearInterval(APP.player.watchdogTimer);
+  clearInterval(APP.player.scheduleTimer);
+  if(document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+
+  if(location.hash === '#tv'){
+    location.hash = '';
+    location.reload();
+  } else {
+    document.getElementById('tvUI').classList.remove('show');
+    document.getElementById('adminUI').style.display = 'grid';
+  }
+}
+
+function updateTVClock(){
+  const now = new Date();
+  document.getElementById('tvClock').textContent = now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('tvDate').textContent = now.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
+}
+
+/* ----------- TICKER + RSS ----------- */
+function buildTicker(){
+  const speed = APP.state.settings.tickerSpeed || 40;
+  const text = APP.state.settings.ticker || '';
+  const tk = document.getElementById('tvTicker');
+  // duplicar para loop infinito suave
+  tk.innerHTML = `<span>${escapeHTML(text)}</span><span>${escapeHTML(text)}</span>`;
+  tk.style.animationDuration = speed + 's';
+}
+
+let RSS_CACHE = '';
+async function initRSS(){
+  clearInterval(APP.player.rssTimer);
+  const url = APP.state.settings.rss;
+  if(!url){
+    document.getElementById('rssStatus').textContent = 'RSS: desativado';
+    return;
+  }
+  await fetchRSS();
+  APP.player.rssTimer = setInterval(fetchRSS, 30 * 60 * 1000);
+}
+async function fetchRSS(){
+  const url = APP.state.settings.rss;
+  if(!url) return;
+  try {
+    document.getElementById('rssStatus').textContent = 'RSS: buscando...';
+    const api = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`;
+    const res = await fetch(api);
+    const data = await res.json();
+    if(data.status !== 'ok') throw new Error('rss falhou');
+    const headlines = data.items.slice(0, 8).map(i => i.title).join('  •  ');
+    RSS_CACHE = headlines;
+    // injetar no ticker
+    const fixed = APP.state.settings.ticker || '';
+    const merged = fixed + '  •  ' + headlines;
+    const tk = document.getElementById('tvTicker');
+    if(tk) tk.innerHTML = `<span>${escapeHTML(merged)}</span><span>${escapeHTML(merged)}</span>`;
+    document.getElementById('rssStatus').textContent = `RSS: ${data.items.length} headlines`;
+  } catch(e){
+    console.warn('RSS falhou:', e);
+    document.getElementById('rssStatus').textContent = 'RSS: erro';
+  }
+}
+
+/* ----------- WEATHER ----------- */
+async function initWeather(){
+  let lat = parseFloat(APP.state.settings.lat);
+  let lon = parseFloat(APP.state.settings.lon);
+
+  if(!lat || !lon){
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(p => fetchWeather(p.coords.latitude, p.coords.longitude),
+        () => fetchWeather(-20.4697, -54.6201));
+    } else {
+      fetchWeather(-20.4697, -54.6201);
+    }
+  } else {
+    fetchWeather(lat, lon);
+  }
+}
+async function fetchWeather(lat, lon){
+  try {
+    document.getElementById('weatherStatus').textContent = 'CLIMA: buscando...';
+    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m`);
+    const d = await r.json();
+    const t = Math.round(d.current.temperature_2m);
+    document.getElementById('tvTemp').textContent = t + '°';
+    document.getElementById('weatherStatus').textContent = `CLIMA: ${t}°C`;
+    setTimeout(() => fetchWeather(lat, lon), 30 * 60 * 1000);
+  } catch(e){
+    document.getElementById('weatherStatus').textContent = 'CLIMA: offline';
+  }
+}
+
+/* ----------- HOTKEYS ----------- */
+function setupHotkeys(){
+  document.addEventListener('keydown', e => {
+    if(!document.getElementById('tvUI').classList.contains('show')) return;
+    if(e.key === 'Escape') exitPlayer();
+    else if(e.key === 'ArrowRight'){ clearTimeout(APP.player.timer); nextItem(); }
+    else if(e.key === 'ArrowLeft'){ clearTimeout(APP.player.timer); prevItem(); }
+    else if(e.key === ' '){ e.preventDefault(); togglePause(); }
+    else if(e.key === 'f' || e.key === 'F'){
+      if(document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen().catch(()=>{});
+    }
+    else if(e.key === 'r' || e.key === 'R'){
+      // toggle rápido de orientação (sem persistir)
+      const tv = document.getElementById('tvUI');
+      tv.classList.toggle('portrait');
+      toast('Orientação: ' + (tv.classList.contains('portrait') ? 'VERTICAL' : 'HORIZONTAL'));
+    }
+  });
+}
+function showHint(){
+  const h = document.getElementById('tvHint');
+  h.classList.add('show');
+  setTimeout(() => h.classList.remove('show'), 4000);
+}
+
+function applyOrientation(){
+  const tv = document.getElementById('tvUI');
+  if(!tv.classList.contains('show')) return;
+  const mode = APP.state.settings.orientation || 'auto';
+  let portrait = false;
+  if(mode === 'portrait') portrait = true;
+  else if(mode === 'landscape') portrait = false;
+  else portrait = window.innerHeight > window.innerWidth;
+  tv.classList.toggle('portrait', portrait);
+}
+
+/* ----------- HELPERS ----------- */
+function fileToDataURL(file){
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = e => res(e.target.result);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+function downloadJSON(obj, filename){
+  const blob = new Blob([JSON.stringify(obj, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+function escapeHTML(s){
+  return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function slug(s){
+  return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').substring(0,40) || 'export';
+}
+function formatDuration(sec){
+  const m = Math.floor(sec/60), s = sec%60;
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+function mediaTypeLabel(t){
+  return ({image:'IMG', video:'MP4', 'url-image':'URL·IMG', 'url-video':'URL·MP4', youtube:'YT'})[t] || '?';
+}
+function extractYouTubeId(url){
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+    /^([a-zA-Z0-9_-]{11})$/
+  ];
+  for(const p of patterns){
+    const m = url.match(p);
+    if(m) return m[1];
+  }
+  return null;
+}
+function setStatus(dotId, textId, text, ok=true){
+  const dot = document.getElementById(dotId);
+  if(dot) dot.classList.toggle('idle', !ok);
+  const t = document.getElementById(textId);
+  if(t) t.textContent = text;
+}
+async function updateStorageUsage(){
+  try {
+    if(navigator.storage && navigator.storage.estimate){
+      const e = await navigator.storage.estimate();
+      const used = (e.usage / 1024 / 1024).toFixed(1);
+      const quota = (e.quota / 1024 / 1024).toFixed(0);
+      document.getElementById('storageUsed').textContent = `STORAGE: ${used}MB / ${quota}MB`;
+    }
+  } catch(e){}
+}
+
+function copyPlayerURL(){
+  const inp = document.getElementById('playerURL');
+  inp.select();
+  document.execCommand('copy');
+  toast('URL copiada','ok');
+}
+
+/* ----------- TOAST + MODAL ----------- */
+function toast(msg, type=''){
+  const wrap = document.getElementById('toastWrap');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  wrap.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+function showModal({title, text, onConfirm}){
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalText').textContent = text;
+  const btn = document.getElementById('modalConfirm');
+  const newBtn = btn.cloneNode(true);
+  btn.parentNode.replaceChild(newBtn, btn);
+  newBtn.addEventListener('click', () => {
+    closeModal();
+    onConfirm();
+  });
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){
+  document.getElementById('modal').classList.remove('show');
+}
+</script>
+</body>
+</html>
